@@ -38,6 +38,12 @@ v1_router.register(
     basename='users'
 )
 
+v1_router.register(
+    r'users/(?P<user_id>\d+)',
+    UserViewSet,
+    basename='user'
+)
+
 urlpatterns = [
     path('', include(v1_router.urls)),
     # path('v1/auth/signup/', signup),

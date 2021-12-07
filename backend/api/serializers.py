@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'id', 'email', 'first_name', 'last_name')
         model = User
-    # TODO добавить is subscibed
+    # TODO добавить is subscibed в вывод списка пользователей и конкретного пользователя
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
 
