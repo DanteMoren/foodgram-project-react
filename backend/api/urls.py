@@ -1,9 +1,11 @@
 from django.urls import include, path
 from rest_framework import routers
+from djoser.views import UserViewSet as DjoserUserViewSet
+from rest_framework.authtoken.views import obtain_auth_token
+from .views import TokenCreateView, TokenDestroyView
 
 # from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
 #                     ReviewViewSet, TitleViewSet, UserViewSet, signup, token)
-from .views import UserViewSet
 
 v1_router = routers.DefaultRouter()
 
@@ -34,18 +36,19 @@ v1_router = routers.DefaultRouter()
 # )
 v1_router.register(
     r'users',
-    UserViewSet,
+    DjoserUserViewSet,
     basename='users'
 )
 
-v1_router.register(
-    r'users/(?P<user_id>\d+)',
-    UserViewSet,
-    basename='user'
-)
+# v1_router.register(
+#     r'users/(?P<user_id>\d+)',
+#     UserViewSet,
+#     basename='user'
+# )
 
 urlpatterns = [
     path('', include(v1_router.urls)),
-    # path('v1/auth/signup/', signup),
-    # path('v1/auth/token/', token)
+    path('auth/token/login/', TokenCreateView.as_view(), name="login"),
+    path('auth/token/logout/', TokenDestroyView.as_view(), name="logout"),
+    # path('token/logout', token)
 ]
