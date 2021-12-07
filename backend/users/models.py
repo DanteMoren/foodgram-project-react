@@ -17,11 +17,12 @@ class User(AbstractUser):
         'Username',
         max_length=150,
         unique=True,
-        help_text=('Required. 150 characters or fewer.'
-                   'Letters, digits and @/./+/-/_ only.'),
+        help_text=('Никнейм (является необходимым).'
+                   '150 символов или меньше.'
+                   'Только буквы, цифры и @/./+/-/_.'),
         validators=[username_validator, username_not_me_validator],
         error_messages={
-            'unique': ('A user with that username already exists.'),
+            'unique': ('Пользователь с таким именем уже существует.'),
         },
     )
     first_name = models.CharField(
@@ -29,12 +30,14 @@ class User(AbstractUser):
         max_length=30,
         blank=True,
         null=True,
+        help_text=('Имя пользователя')
     )
     last_name = models.CharField(
         'last name',
         max_length=150,
         blank=True,
         null=True,
+        help_text=('Фамилия пользователя')
     )
     email = models.EmailField(
         'Email address',
@@ -42,6 +45,7 @@ class User(AbstractUser):
         null=False,
         max_length=254,
         unique=True,
+        help_text=('Email пользователя'),
         error_messages={
             'unique': ('A user with that email already exists.'),
         })
@@ -52,6 +56,7 @@ class User(AbstractUser):
         blank=False,
         default=USER,
         null=False,
+        help_text=('Роль пользователя на сайте')
     )
 
     class Meta:
