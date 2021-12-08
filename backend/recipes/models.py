@@ -1,6 +1,8 @@
 from django.db import models
+from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 
-from users.models import User
+User = get_user_model()
 
 
 class Tag(models.Model):
@@ -31,7 +33,7 @@ class Tag(models.Model):
         )
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Ingredient(models.Model):
@@ -121,3 +123,30 @@ class IngredientRecipe(models.Model):
     
     def __str__(self):
         return f'{self.recipe.name}, {self.ingredient.name}'
+
+# class IngredientRecipe(models.Model):
+#     ingredient = models.ForeignKey(
+#         Ingredient,
+#         on_delete=models.CASCADE,
+#         related_name="ingredients_amount",
+#         verbose_name="Ингредиент"
+#     )
+#     recipe = models.ForeignKey(
+#         Recipe, on_delete=models.CASCADE,
+#         related_name="ingredients_amount",
+#         verbose_name="Рецепт"
+#     )
+#     amount = models.PositiveSmallIntegerField(
+#         blank=False,
+#         # validators=[
+#         #     MinValueValidator(limit_value=0, message="Количество не может быть меньше 0")
+#         # ],
+#         verbose_name="Количество"
+#     )
+
+#     # class Meta:
+#     #     verbose_name = "Количество ингредиента"
+#     #     verbose_name_plural = "Количества ингредиентов"
+
+#     def __str__(self):
+#         return f'{self.recipe.name}, {self.ingredient.name}'

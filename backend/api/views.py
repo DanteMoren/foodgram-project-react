@@ -5,11 +5,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view
 from djoser.views import TokenCreateView as DjoserTokenCreateView
 from djoser.views import TokenDestroyView as DjoserTokenDestroyView
-from .serializers import UserSerializer
 from djoser.conf import settings
 from djoser import utils
-from recipes.models import Tag, Ingredient
-from .serializers import TagSerializer, IngredientSerializer
+from recipes.models import Tag, Ingredient, Recipe
+from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer
 
 class TokenCreateView(DjoserTokenCreateView):
     
@@ -36,3 +35,13 @@ class TagView(viewsets.ReadOnlyModelViewSet):
 class IngredientView(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+
+class RecipeView(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    
+    def perform_create(self, serializer=RecipeSerializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer=RecipeSerializer):
+        serializer.save(author=self.request.user)

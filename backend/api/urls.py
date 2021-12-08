@@ -3,7 +3,7 @@ from rest_framework import routers
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.authtoken.views import obtain_auth_token
 from .views import (TokenCreateView, TokenDestroyView, TagView,
-                    IngredientView,)
+                    IngredientView, RecipeView)
 
 # from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
 #                     ReviewViewSet, TitleViewSet, UserViewSet, signup, token)
@@ -26,6 +26,12 @@ router.register(
     'ingredients',
     IngredientView,
     basename='ingredients'
+)
+
+router.register(
+    'recipes',
+    RecipeView,
+    basename='recipes'
 )
 
 urlpatterns = [

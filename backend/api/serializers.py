@@ -1,12 +1,15 @@
 import datetime as dt
-
+from drf_extra_fields.fields import Base64ImageField
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.db.models import fields
 from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password
+from django.core.exceptions import ValidationError
 
 from users.models import User
-from recipes.models import Tag, Ingredient, IngredientRecipe
+from recipes.models import Tag, Ingredient, IngredientRecipe, Recipe
 from users.validators import username_not_me_validator
 
 
@@ -60,10 +63,29 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    amount = serializers.IntegerField()
+
     class Meta:
-        model = IngredientRecipe,
-        fields = ('id', 'amount')
+        model = IngredientRecipe
+        fields = ['id', 'amount']
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    pass
+    author = UserSerializer(read_only=True)
+    image = Base64ImageField()
+    # ingredients = IngredientRecipeSerializer(many=True, required=True)
+    class Meta:
+        model = Recipe
+        fields = (
+            'id', 'tags', 'author', 'ingredients',
+            'name', 'image', 'text', 'cooking_time'
+            )
+    
+    # def create(self, validated_data):
+    #     # tags = validated_data['tags']
+    #     # ingredients = validated_data['ingredients']
+    #     recipe = Recipe.objects.create(**validated_data)
+    #     # for tag in tags:
+    #     #     recipe.tags.add(tag)
+    #     return recipe
