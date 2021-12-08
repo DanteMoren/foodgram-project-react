@@ -64,9 +64,14 @@ class Recipe(models.Model):
         verbose_name='Теги',
         related_name='recipes',
     )
+    # ingredients = models.ManyToManyField(
+    #     Ingredient,
+    #     through='IngredientRecipe',
+    # )
     ingredients = models.ManyToManyField(
-        Ingredient,
-        through='IngredientRecipe',
+        Ingredient, through='IngredientRecipe',
+        through_fields=('recipe', 'ingredient'),
+        verbose_name='Ингредиенты'
     )
     name = models.CharField(
         verbose_name='Название рецепта',
@@ -101,6 +106,16 @@ class Recipe(models.Model):
         blank=False,
         null=False,
     )
+    favorite_this = models.ManyToManyField(
+        User,
+        related_name='favourite_recipes',
+        verbose_name='Кому понравилось'
+    )
+    shopping_carts = models.ManyToManyField(
+        User,
+        related_name='shopping_carts',
+        verbose_name='Кто хочет купить'
+    )
 
     class Meta:
         ordering = ['-pub_date']
@@ -117,36 +132,43 @@ class IngredientRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='ingredients_with_amount',
+        related_name='related_ingredients_with_amount',
         )
-    amount = models.PositiveIntegerField()
+    amount = models.PositiveSmallIntegerField(
+        blank=False,
+        validators=[
+            MinValueValidator(
+                limit_value=0,
+                message='Количество ингредиентов не может быть меньше 0')
+        ],
+        verbose_name='Количество'
+    )
     
     def __str__(self):
         return f'{self.recipe.name}, {self.ingredient.name}'
 
-# class IngredientRecipe(models.Model):
-#     ingredient = models.ForeignKey(
-#         Ingredient,
+
+class Purchase(models.Model):
+    buyer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='buyer'
+        )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='pur_recipe'
+        )
+
+
+# class Favourite(models.Model):
+#     user = models.ForeignKey(
+#         User,
 #         on_delete=models.CASCADE,
-#         related_name="ingredients_amount",
-#         verbose_name="Ингредиент"
-#     )
+#         related_name='user_favourite'
+#         )
 #     recipe = models.ForeignKey(
-#         Recipe, on_delete=models.CASCADE,
-#         related_name="ingredients_amount",
-#         verbose_name="Рецепт"
-#     )
-#     amount = models.PositiveSmallIntegerField(
-#         blank=False,
-#         # validators=[
-#         #     MinValueValidator(limit_value=0, message="Количество не может быть меньше 0")
-#         # ],
-#         verbose_name="Количество"
-#     )
-
-#     # class Meta:
-#     #     verbose_name = "Количество ингредиента"
-#     #     verbose_name_plural = "Количества ингредиентов"
-
-#     def __str__(self):
-#         return f'{self.recipe.name}, {self.ingredient.name}'
+#         'Recipe',
+#         on_delete=models.CASCADE,
+#         related_name='recipe_favourite'
+#         )

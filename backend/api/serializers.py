@@ -7,9 +7,10 @@ from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
+from rest_framework.fields import IntegerField
 
 from users.models import User
-from recipes.models import Tag, Ingredient, IngredientRecipe, Recipe
+from recipes.models import Tag, Ingredient, IngredientRecipe, Recipe, Purchase
 from users.validators import username_not_me_validator
 
 
@@ -72,20 +73,47 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
+    author = UserSerializer(
+        read_only=True
+        )
     image = Base64ImageField()
-    # ingredients = IngredientRecipeSerializer(many=True, required=True)
+    ingredients = IngredientRecipeSerializer(
+        many=True,
+        source='related_ingredients_with_amount',
+        required=True
+        )
     class Meta:
         model = Recipe
         fields = (
             'id', 'tags', 'author', 'ingredients',
             'name', 'image', 'text', 'cooking_time'
             )
-    
-    # def create(self, validated_data):
-    #     # tags = validated_data['tags']
-    #     # ingredients = validated_data['ingredients']
-    #     recipe = Recipe.objects.create(**validated_data)
-    #     # for tag in tags:
-    #     #     recipe.tags.add(tag)
-    #     return recipe
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('related_ingredients_with_amount')
+        recipe = Recipe.objects.create(**validated_data)
+        for tag in tags:
+            recipe.tags.add(tag)
+        for ingredient_from_list in ingredients:
+            current_ingredient = get_object_or_404(Ingredient, id=ingredient_from_list['id']) 
+            IngredientRecipe.objects.create(
+                ingredient = current_ingredient,
+                recipe = recipe,
+                amount = ingredient_from_list['amount'],
+            )
+            
+        return recipe
+
+
+class ShopCartSerializer(serializers.Serializer):
+    # "id": 0,
+    # "name": "string",
+    # "image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
+    # "cooking_time": 1
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    image = serializers.ImageField()
+    cooking_time = serializers.IntegerField()
+    class Meta:
+        fields = ('id', 'name', 'image', 'cooking_time')
