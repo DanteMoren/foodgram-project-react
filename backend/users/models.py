@@ -49,15 +49,6 @@ class User(AbstractUser):
         error_messages={
             'unique': ('A user with that email already exists.'),
         })
-    role = models.CharField(
-        'User role',
-        max_length=9,
-        choices=CHOICES,
-        blank=False,
-        default=USER,
-        null=False,
-        help_text=('Роль пользователя на сайте')
-    )
 
     class Meta:
         ordering = ['-id']

@@ -1,16 +1,20 @@
-import datetime as dt
-from drf_extra_fields.fields import Base64ImageField
-from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.db.models import fields
-from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
+from djoser.serializers import (
+    UserCreateSerializer as BaseUserRegistrationSerializer
+)
 from rest_framework import serializers
+from drf_extra_fields.fields import Base64ImageField
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.auth.hashers import make_password
-from django.core.exceptions import ValidationError
-from rest_framework.fields import IntegerField
 
+from recipes.models import (
+    Tag,
+    Ingredient,
+    IngredientRecipe,
+    Recipe,
+    Follow
+)
 from users.models import User
-from recipes.models import Tag, Ingredient, IngredientRecipe, Recipe, Purchase
 from users.validators import username_not_me_validator
 
 
@@ -25,13 +29,27 @@ class UserSerializer(serializers.ModelSerializer):
         required=True,
         style={'input_type': 'password', 'placeholder': 'Password'}
     )
+    is_subscribed = serializers.SerializerMethodField()
+
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        if str(request.user) != 'AnonymousUser':
+            return Follow.objects.filter(
+                author=obj.id,
+                user=request.user
+                ).exists()
+        return False
+
     class Meta:
         fields = (
-            'username', 'id', 'email', 'first_name', 'last_name', 'password')
+            'username', 'id', 'email', 'first_name',
+            'last_name', 'password', 'is_subscribed'
+            )
         model = User
-    # TODO добавить is subscibed в вывод списка пользователей и конкретного пользователя
+
     def create(self, validated_data):
-        validated_data['password'] = make_password(validated_data.get('password'))
+        validated_data['password'] = make_password(
+            validated_data.get('password'))
         return User.objects.create_user(**validated_data)
 
 
@@ -46,6 +64,7 @@ class UserRegistrationSerializer(BaseUserRegistrationSerializer):
         required=True,
         style={'input_type': 'password', 'placeholder': 'Password'}
     )
+
     class Meta(BaseUserRegistrationSerializer.Meta):
         fields = (
             'username', 'id', 'email', 'first_name', 'last_name', 'password')
@@ -75,19 +94,45 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(
         read_only=True
-        )
+    )
     image = Base64ImageField()
     ingredients = IngredientRecipeSerializer(
         many=True,
         source='related_ingredients_with_amount',
         required=True
-        )
+    )
+    is_favorited = serializers.SerializerMethodField(
+        read_only=True
+    )
+    is_in_shopping_сart = serializers.SerializerMethodField(
+        read_only=True
+    )
+
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
+        if str(request.user) != 'AnonymousUser':
+            return Recipe.objects.filter(
+                id=obj.id,
+                favorite_this=request.user
+                ).exists()
+        return False
+
+    def get_is_in_shopping_сart(self, obj):
+        request = self.context.get('request')
+        if str(request.user) != 'AnonymousUser':
+            return Recipe.objects.filter(
+                id=obj.id,
+                shopping_carts=request.user
+                ).exists()
+        return False
+
     class Meta:
         model = Recipe
         fields = (
             'id', 'tags', 'author', 'ingredients',
+            'is_favorited', 'is_in_shopping_сart',
             'name', 'image', 'text', 'cooking_time'
-            )
+        )
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
@@ -96,24 +141,53 @@ class RecipeSerializer(serializers.ModelSerializer):
         for tag in tags:
             recipe.tags.add(tag)
         for ingredient_from_list in ingredients:
-            current_ingredient = get_object_or_404(Ingredient, id=ingredient_from_list['id']) 
+            current_ingredient = get_object_or_404(
+                Ingredient, id=ingredient_from_list['id'])
             IngredientRecipe.objects.create(
-                ingredient = current_ingredient,
-                recipe = recipe,
-                amount = ingredient_from_list['amount'],
+                ingredient=current_ingredient,
+                recipe=recipe,
+                amount=ingredient_from_list['amount'],
             )
-            
+
         return recipe
 
 
 class ShopCartSerializer(serializers.Serializer):
-    # "id": 0,
-    # "name": "string",
-    # "image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
-    # "cooking_time": 1
     id = serializers.IntegerField()
     name = serializers.CharField()
     image = serializers.ImageField()
     cooking_time = serializers.IntegerField()
+
     class Meta:
         fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class UserSubscriptionSerializer(UserSerializer):
+    recipes = serializers.SerializerMethodField(
+        read_only=True
+    )
+
+    recipes_count = serializers.SerializerMethodField(
+        read_only=True
+    )
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        limit = request.query_params.get('recipes_limit')
+        if limit:
+            recipes = Recipe.objects.filter(author=obj)[:int(limit)]
+        else:
+            recipes = Recipe.objects.filter(author=obj)
+        serializer = ShopCartSerializer(recipes, many=True)
+        return serializer.data
+
+    def get_recipes_count(self, obj):
+        return len(Recipe.objects.filter(author=obj))
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'id', 'email', 'first_name',
+            'last_name', 'password', 'is_subscribed',
+            'recipes', 'recipes_count'
+            )

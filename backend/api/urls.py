@@ -1,16 +1,14 @@
 from django.urls import include, path
 from rest_framework import routers
-from djoser.views import UserViewSet as DjoserUserViewSet
-from rest_framework.authtoken.views import obtain_auth_token
-from .views import (TokenCreateViewSet, TokenDestroyViewSet, TagViewSet,
-                    IngredientViewSet, RecipeViewSet)
+from .views import (TokenCreateView, TokenDestroyView, TagViewSet,
+                    IngredientViewSet, RecipeViewSet, UserViewSet)
 
 
 router = routers.DefaultRouter()
 
 router.register(
     'users',
-    DjoserUserViewSet,
+    UserViewSet,
     basename='users'
 )
 
@@ -34,9 +32,7 @@ router.register(
 
 
 urlpatterns = [
-    # path('recipes/<recipe_id>/shoping_cart', shoping_cart, name='purchase'),
     path('', include(router.urls)),
-    path('auth/token/login/', TokenCreateViewSet.as_view(), name="login"),
-    path('auth/token/logout/', TokenDestroyViewSet.as_view(), name="logout"),
-    # path('token/logout', token)
+    path('auth/token/login/', TokenCreateView.as_view(), name='login'),
+    path('auth/token/logout/', TokenDestroyView.as_view(), name='logout'),
 ]
