@@ -142,14 +142,20 @@ class UserViewSet(DjoserUserViewSet):
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Ingredient.objects.all()
+    # queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    search_fields = ('^name',)
+    
+    def get_queryset(self):
+        request = self.request
+        name = request.GET.get('name')
+        print(name)
+        queryset = Ingredient.objects.filter(name__istartswith=name)
+        return queryset
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

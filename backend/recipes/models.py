@@ -56,6 +56,9 @@ class Ingredient(models.Model):
 
     class Meta:
         ordering = ['name']
+    
+    def __str__(self):
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Recipe(models.Model):
@@ -87,7 +90,7 @@ class Recipe(models.Model):
         null=False,
     )
 
-    cooking_time = models.PositiveIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления (в минутах)',
         blank=False,
         null=False,
@@ -104,11 +107,13 @@ class Recipe(models.Model):
     )
     favorite_this = models.ManyToManyField(
         User,
+        blank=True,
         related_name='favourite_recipes',
         verbose_name='Кому понравилось'
     )
     shopping_carts = models.ManyToManyField(
         User,
+        blank=True,
         related_name='shopping_carts',
         verbose_name='Кто хочет купить'
     )

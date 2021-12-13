@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db.models import Count
 
-from .models import Tag, Ingredient, Recipe, Follow
+from .models import Tag, Ingredient, Recipe, Follow, IngredientRecipe
 
 
 @admin.register(Tag)
@@ -10,6 +10,10 @@ class TagAdmin(admin.ModelAdmin):
         'name',
     )
 
+
+class IngredientsRecipeInLine(admin.TabularInline):
+    model = Recipe.ingredients.through
+    extra = 1
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
@@ -25,6 +29,7 @@ class Recipe(admin.ModelAdmin):
     @admin.display(description='Количество добавлений в избранное')
     def favorite_count(self, obj):
         return obj.favorite_this.count()
+    inlines = (IngredientsRecipeInLine, )
     list_display = (
         'name',
         'author',

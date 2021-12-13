@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-c9=12zmdgx3%v8g#2)enpbu*7gz6o^=3z!!n0j-2eyzhtvrw^('
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -105,9 +105,9 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'redoc'),
-# ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend_static'),
+]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
