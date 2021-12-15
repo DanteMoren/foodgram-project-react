@@ -1,18 +1,19 @@
-from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS
+from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
+from djoser import utils
 from djoser.views import TokenCreateView as DjoserTokenCreateView
 from djoser.views import TokenDestroyView as DjoserTokenDestroyView
 from djoser.views import UserViewSet as DjoserUserViewSet
-from rest_framework.pagination import LimitOffsetPagination
 from djoser.conf import settings
-from djoser import utils
 from django.contrib.auth import get_user_model
 from django.http import FileResponse
+
 from recipes.models import Tag, Ingredient, Recipe, IngredientRecipe, Follow
 from .serializers import (
     TagSerializer,
