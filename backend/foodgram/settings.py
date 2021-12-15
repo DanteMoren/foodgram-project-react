@@ -5,6 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
+# SECRET_KEY = 'django-insecure-c9=12zmdgx3%v8g#2enpbu*7gz6o^=3z!!n0j-2eyzhtvrw^'
 
 DEBUG = True  # TODO изменить
 
@@ -38,6 +39,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
+
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 
 TEMPLATES = [
     {
@@ -107,6 +110,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'frontend_static'),
+    os.path.join(BASE_DIR, 'redoc'),
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
