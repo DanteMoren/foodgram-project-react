@@ -3,6 +3,7 @@ from recipes.models import Ingredient, Tag
 
 from django.core.management.base import BaseCommand
 
+
 class Command(BaseCommand):
     help = 'Load ingredients data to DB'
 
@@ -14,10 +15,12 @@ class Command(BaseCommand):
                 Ingredient.objects.get_or_create(
                     name=name,
                     measurement_unit=unit,
-                    )
+                )
 
-        self.stdout.write(self.style.SUCCESS('Loading of ingredients is successful'))
-        
+        self.stdout.write(
+            self.style.SUCCESS('Loading of ingredients is successful')
+        )
+
         with open('recipes/data/tags.csv', 'r', encoding='utf-8') as f:
             reader = csv.reader(f)
             for row in reader:
@@ -26,6 +29,6 @@ class Command(BaseCommand):
                     name=name,
                     color=color,
                     slug=slug,
-                    )
+                )
 
         self.stdout.write(self.style.SUCCESS('Loading of tags is successful'))

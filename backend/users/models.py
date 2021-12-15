@@ -2,16 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
-from users.validators import username_not_me_validator
-
 
 class User(AbstractUser):
-    USER = 'user'
-    ADMIN = 'admin'
-
-    CHOICES = [(USER, 'user'),
-               (ADMIN, 'admin')]
-
     username_validator = UnicodeUsernameValidator()
     username = models.CharField(
         'Username',
@@ -20,7 +12,7 @@ class User(AbstractUser):
         help_text=('Никнейм (является необходимым).'
                    '150 символов или меньше.'
                    'Только буквы, цифры и @/./+/-/_.'),
-        validators=[username_validator, username_not_me_validator],
+        validators=[username_validator],
         error_messages={
             'unique': ('Пользователь с таким именем уже существует.'),
         },

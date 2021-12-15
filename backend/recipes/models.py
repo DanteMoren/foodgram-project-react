@@ -13,7 +13,7 @@ class Tag(models.Model):
         null=False,
         unique=True,
         help_text='Дайте короткое название тегу.'
-        )
+    )
     color = models.CharField(
         verbose_name='Цвет',
         max_length=7,
@@ -21,7 +21,7 @@ class Tag(models.Model):
         null=False,
         unique=True,
         help_text=('Укажите цвет для тега в формате HEX.')
-        )
+    )
     slug = models.SlugField(
         verbose_name='Слаг',
         max_length=200,
@@ -30,7 +30,7 @@ class Tag(models.Model):
         unique=True,
         help_text=('Укажите адрес для страницы задачи. Используйте только '
                    'латиницу, цифры, дефисы и знаки подчёркивания.')
-        )
+    )
 
     def __str__(self):
         return self.name
@@ -56,7 +56,7 @@ class Ingredient(models.Model):
 
     class Meta:
         ordering = ['name']
-    
+
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}'
 
@@ -77,13 +77,13 @@ class Recipe(models.Model):
         max_length=255,
         blank=False,
         null=False,
-        )
+    )
     author = models.ForeignKey(
         User,
         verbose_name='Автор рецепта',
         on_delete=models.CASCADE,
         related_name='recipes',
-        )
+    )
     text = models.TextField(
         verbose_name='Текстовое описание',
         blank=False,
@@ -129,12 +129,12 @@ class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE
-        )
+    )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='related_ingredients_with_amount',
-        )
+    )
     amount = models.PositiveSmallIntegerField(
         blank=False,
         validators=[
@@ -154,12 +154,12 @@ class Follow(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='follower'
-        )
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='following'
-        )
+    )
 
     class Meta:
         unique_together = ['user', 'author']

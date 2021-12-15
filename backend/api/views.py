@@ -1,8 +1,9 @@
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import filters, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.viewsets import generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import SAFE_METHODS
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import TokenCreateView as DjoserTokenCreateView
 from djoser.views import TokenDestroyView as DjoserTokenDestroyView
@@ -17,11 +18,12 @@ from .serializers import (
     TagSerializer,
     IngredientSerializer,
     RecipeSerializer,
+    RecipeReadSerializer,
     ShopCartSerializer,
     UserSubscriptionSerializer
-    )
+)
 from .permissions import OwnerOrAdminOrReadOnly
-from .filters import TagsFilter
+from .filters import RecipesListFilter, IngredientSearchFilter
 
 User = get_user_model()
 
@@ -52,7 +54,7 @@ class UserViewSet(DjoserUserViewSet):
         detail=False,
         permission_classes=[IsAuthenticated],
         pagination_class=None,
-        )
+    )
     def me(self, request, *args, **kwargs):
         self.get_object = self.get_instance
         if request.method == 'GET':
@@ -132,7 +134,7 @@ class UserViewSet(DjoserUserViewSet):
             return Response(
                 {'detail': 'Нельзя подписаться на самого себя'},
                 status=status.HTTP_400_BAD_REQUEST
-                )
+            )
         return Response(
             {'detail': 'Действие уже выполнено'},
             status=status.HTTP_400_BAD_REQUEST
@@ -146,49 +148,23 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    # queryset = Ingredient.objects.all()
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
-    
-    def get_queryset(self):
-        request = self.request
-        name = request.GET.get('name')
-        print(name)
-        queryset = Ingredient.objects.filter(name__istartswith=name)
-        return queryset
+    filter_backends = [IngredientSearchFilter]
+    search_fields = ['^name']
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    serializer_class = RecipeSerializer
     permission_classes = [OwnerOrAdminOrReadOnly]
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = TagsFilter
+    filterset_class = RecipesListFilter
 
-    def get_queryset(self):
-        request = self.request
-        recipes = Recipe.objects.all()
-        if str(request.user) != 'AnonymousUser':
-
-            is_favorited = request.GET.get('is_favorited')
-            if is_favorited is not None:
-                if is_favorited == '1':
-                    recipes = recipes.filter(favorite_this=request.user)
-                else:
-                    recipes = recipes.exclude(favorite_this=request.user)
-
-            is_in_shopping_сart = request.GET.get('is_in_shopping_сart')
-            if is_in_shopping_сart is not None:
-                if is_in_shopping_сart == '1':
-                    recipes = recipes.filter(shopping_carts=request.user)
-                else:
-                    recipes = recipes.exclude(shopping_carts=request.user)
-
-            author_id = request.GET.get('author')
-            if author_id:
-                recipes = recipes.filter(author__id=author_id)
-
-        return recipes
+    def get_serializer_class(self):
+        if self.request.method in SAFE_METHODS:
+            return RecipeReadSerializer
+        return RecipeSerializer
 
     def perform_create(self, serializer=RecipeSerializer):
         serializer.save(author=self.request.user)
@@ -213,13 +189,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).exists()
         if request.method == 'GET' and not is_added:
             recipe.shopping_carts.add(user)
-            data = {
-                'id': recipe.id,
-                'name': recipe.name,
-                'image': recipe.image,
-                'cooking_time': recipe.cooking_time
-            }
-            serializer = ShopCartSerializer(data)
+            serializer = ShopCartSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif request.method == 'DELETE' and is_added:
             recipe.shopping_carts.remove(user)
@@ -280,14 +250,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
         ingredients = IngredientRecipe.objects.filter(
             recipe__shopping_carts=user
-            ).values(
+        ).values(
             'ingredient__name',
             'ingredient__measurement_unit',
             'amount'
         ).values_list(
             'ingredient__name',
             'ingredient__measurement_unit',
-            'amount')
+            'amount'
+        )
         shop_list = {}
         ingredients = ingredients
         for name, unit, amount in ingredients:

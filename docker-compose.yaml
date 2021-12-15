@@ -18,14 +18,11 @@ services:
       - ./.env
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: dantemoren/foodgram_frontend:latest
     volumes:
       - frontend:/app/result_build/build/:rw
       - frontend_static:/app/static/:rw
       - redoc:/app/result_build/redoc/:rw
-
 
   web:
     build: .

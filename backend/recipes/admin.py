@@ -1,7 +1,6 @@
 from django.contrib import admin
-from django.db.models import Count
 
-from .models import Tag, Ingredient, Recipe, Follow, IngredientRecipe
+from .models import Tag, Ingredient, Recipe, Follow
 
 
 @admin.register(Tag)
@@ -14,6 +13,7 @@ class TagAdmin(admin.ModelAdmin):
 class IngredientsRecipeInLine(admin.TabularInline):
     model = Recipe.ingredients.through
     extra = 1
+
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
@@ -39,16 +39,16 @@ class Recipe(admin.ModelAdmin):
         'author',
         'name',
         'tags'
-        )
+    )
 
 
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
     list_display = (
-        "pk",
-        "user",
-        "author",
+        'pk',
+        'user',
+        'author',
     )
     list_filter = (
-        "user",
+        'user',
     )
