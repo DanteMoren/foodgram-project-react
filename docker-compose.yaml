@@ -18,7 +18,8 @@ services:
       - ./.env
 
   frontend:
-    image: dantemoren/foodgram_frontend:latest
+    # image: dantemoren/foodgram_frontend:latest
+    build: ./frontend
     volumes:
       - frontend:/app/result_build/build/:rw
       - frontend_static:/app/static/:rw
