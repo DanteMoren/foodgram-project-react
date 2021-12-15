@@ -25,7 +25,7 @@ services:
       - redoc:/app/result_build/redoc/:rw
 
   web:
-    build: .
+    image: dantemoren/foodgram_backend:latest
     restart: unless-stopped
     volumes:
       - dj-static:/app/static/:rw
