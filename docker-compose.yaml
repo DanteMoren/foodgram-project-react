@@ -19,14 +19,12 @@ services:
 
   frontend:
     image: dantemoren/foodgram_frontend:latest
-    build: ./frontend
     volumes:
       - frontend:/app/result_build/build/:rw
       - frontend_static:/app/static/:rw
 
   web:
     image: dantemoren/foodgram_backend:latest
-    build: .
     restart: unless-stopped
     volumes:
       - dj-static:/app/static/:rw

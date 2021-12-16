@@ -201,7 +201,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, recipe, validated_data):
-        ingredients = validated_data.pop('ingredients')
+        print(validated_data)
+        ingredients = validated_data.pop('related_ingredients_with_amount')
         recipe.ingredients.clear()
         for ingredient_from_list in ingredients:
             current_ingredient = get_object_or_404(
