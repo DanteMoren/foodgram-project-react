@@ -213,6 +213,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 amount=ingredient_from_list['amount'],
             )
         tags = validated_data.pop('tags')
+        recipe.tags.clear()
         for tag in tags:
             recipe.tags.add(tag)
         return super().update(recipe, validated_data)
