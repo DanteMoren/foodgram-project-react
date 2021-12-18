@@ -26,9 +26,6 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Recipe)
 class Recipe(admin.ModelAdmin):
-    @admin.display(description='Количество добавлений в избранное')
-    def favorite_count(self, obj):
-        return obj.favorite_this.count()
     inlines = (IngredientsRecipeInLine, )
     list_display = (
         'name',
@@ -40,6 +37,10 @@ class Recipe(admin.ModelAdmin):
         'name',
         'tags'
     )
+
+    @admin.display(description='Количество добавлений в избранное')
+    def favorite_count(self, obj):
+        return obj.favorite_this.count()
 
 
 @admin.register(Follow)

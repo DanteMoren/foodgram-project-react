@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Sum
 from djoser import utils
 from djoser.views import TokenCreateView as DjoserTokenCreateView
 from djoser.views import TokenDestroyView as DjoserTokenDestroyView
@@ -14,7 +15,13 @@ from djoser.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import FileResponse
 
-from recipes.models import Tag, Ingredient, Recipe, IngredientRecipe, Follow
+from recipes.models import (
+    Tag,
+    Ingredient,
+    Recipe,
+    IngredientRecipe,
+    Follow
+)
 from .serializers import (
     TagSerializer,
     IngredientSerializer,
@@ -76,11 +83,8 @@ class UserViewSet(DjoserUserViewSet):
     )
     def subscriptions(self, request, *args, **kwargs):
         user = request.user
-        queryset = Follow.objects.filter(user=user).values_list('author')
-        authors = User.objects.none()
-        for author_id in queryset:
-            author = User.objects.filter(id=author_id[0])
-            authors |= author
+        queryset = Follow.objects.filter(user=user).values_list('author__id')
+        authors = User.objects.filter(id__in=queryset)
         page = self.paginate_queryset(authors)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -259,22 +263,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).values_list(
             'ingredient__name',
             'ingredient__measurement_unit',
-            'amount'
-        )
-        shop_list = {}
-        ingredients = ingredients
-        for name, unit, amount in ingredients:
-            try:
-                shop_list[name]['amount'] += amount
-            except KeyError:
-                shop_list[name] = {}
-                shop_list[name]['amount'] = amount
-                shop_list[name]['measure_unit'] = unit
+        ).annotate(amount=Sum('amount'))
         product_list = 'Список покупок: \n'
-        for name in shop_list:
+        for ingredient in ingredients:
+            name, unit, amount = ingredient
             product_list += f'{name} '
-            product_list += f'({shop_list[name]["measure_unit"]})'
-            product_list += f' — {shop_list[name]["amount"]}\n'
+            product_list += f'({unit})'
+            product_list += f' — {amount}\n'
         my_file = open('Product_list.txt', 'w+', encoding='utf-8')
         my_file.write(product_list)
         return FileResponse(my_file)
