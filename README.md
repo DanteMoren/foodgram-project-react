@@ -4,6 +4,9 @@
 
 Инструкция к api по ссылке: http://dante-preview.ru/api/redoc/
 
+admin email: admin@mail.ru
+password: admin
+
 Для запуска приложения заполнить .env в соответствии с .env.template
 Скопировать docker-compose.yaml и nginx/
 
