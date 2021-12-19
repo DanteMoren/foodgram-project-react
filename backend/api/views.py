@@ -4,7 +4,7 @@ from rest_framework.viewsets import generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS
-from rest_framework.pagination import LimitOffsetPagination
+from api.pagination import LimitPageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum
 from djoser import utils
@@ -55,7 +55,7 @@ class TokenDestroyView(DjoserTokenDestroyView):
 
 
 class UserViewSet(DjoserUserViewSet):
-    pagination_class = LimitOffsetPagination
+    pagination_class = LimitPageNumberPagination
 
     @action(
         methods=['get', 'put', 'patch', 'delete'],
@@ -163,7 +163,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = [OwnerOrAdminOrReadOnly]
-    pagination_class = LimitOffsetPagination
+    pagination_class = LimitPageNumberPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipesListFilter
 
