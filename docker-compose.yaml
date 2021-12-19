@@ -6,7 +6,6 @@ volumes:
   dj-media:
   frontend:
   frontend_static:
-  redoc:
 
 services:
   db:
