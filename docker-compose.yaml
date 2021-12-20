@@ -23,7 +23,8 @@ services:
       - frontend_static:/app/static/:rw
 
   web:
-    image: dantemoren/foodgram_backend:latest
+    # image: dantemoren/foodgram_backend:latest
+    build: .
     restart: unless-stopped
     volumes:
       - dj-static:/app/static/:rw
