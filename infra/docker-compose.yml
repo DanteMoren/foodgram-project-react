@@ -13,7 +13,6 @@ services:
     image: dantemoren/diplom_frontend
     volumes:
       - ./frontend:/app/result_build/build/
-      - redoc:/app/docs/
 
   web:
     image: dantemoren/diplom_backend
