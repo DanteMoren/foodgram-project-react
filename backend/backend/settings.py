@@ -5,7 +5,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
-SECRET_KEY = 'sd'
 
 DEBUG = False
 
@@ -42,10 +41,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'backend.urls'
 
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATES_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
