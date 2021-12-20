@@ -12,7 +12,7 @@ services:
   frontend:
     image: dantemoren/diplom_frontend
     volumes:
-      - ./frontend:/app/result_build/build/
+      - ../frontend:/app/result_build/build/
 
   web:
     image: dantemoren/diplom_backend
