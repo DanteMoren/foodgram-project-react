@@ -32,5 +32,8 @@ docker-compose up -d
 docker-compose exec web python manage.py migrate
 docker-compose exec web python manage.py collectstatic --no-input
 docker-compose exec web python manage.py load_data
+```
+По желанию можно создать суперпользователя (администратора)
+```bash
 docker-compose exec web python manage.py createsuperuser
 ```
